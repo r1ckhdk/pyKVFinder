@@ -5,6 +5,8 @@ on:
   #    types: [published]
   workflow_dispatch:
   push:
+    branches:
+      - master
 
 jobs:
   build_sdist:
