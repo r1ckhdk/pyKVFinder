@@ -1,9 +1,10 @@
 name: Build and deploy
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch: 
+  #  release:
+  #    types: [published]
+  workflow_dispatch:
+  push:
 
 jobs:
   build_sdist:
@@ -37,11 +38,11 @@ jobs:
     strategy:
       matrix:
         # macos-13: x86_64 (intel); macos-14: arm64; macos-15: arm64
-        os: [macos-13, macos-14, macos-15, ubuntu-latest, windows-latest]
+        os: [macos-13]
 
     steps:
       - uses: actions/checkout@v4
-      
+
       # Enable QEMU emulation for ARM
       - name: Set up QEMU
         if: matrix.os == 'ubuntu-latest'
@@ -56,19 +57,19 @@ jobs:
 
       - name: Set environment variable for macos-15
         if: matrix.os == 'macos-15'
-        run: | 
+        run: |
           echo "MACOSX_DEPLOYMENT_TARGET=15.0" >> $GITHUB_ENV
           echo "CC=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
 
       - name: Set environment variable for macos-14
         if: matrix.os == 'macos-14'
-        run: | 
+        run: |
           echo "MACOSX_DEPLOYMENT_TARGET=14.0" >> $GITHUB_ENV
           echo "CC=/opt/homebrew/opt/llvm/bin/clang" >> $GITHUB_ENV
 
       - name: Set environment variable for macos-13
         if: matrix.os == 'macos-13'
-        run: | 
+        run: |
           echo "MACOSX_DEPLOYMENT_TARGET=14.0" >> $GITHUB_ENV
           echo "CC=/usr/local/opt/llvm/bin/clang" >> $GITHUB_ENV
 
@@ -82,29 +83,3 @@ jobs:
         with:
           name: artifacts-${{ matrix.os }}
           path: ./wheelhouse/*.whl
-
-  pypi-publish:
-    name: Upload release to PyPI
-    runs-on: ubuntu-latest
-    needs: [build_sdist, build_wheels]
-    environment:
-      name: pypi
-      url: https://pypi.org/p/pyKVFinder
-    permissions:
-      id-token: write
-
-    steps:
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.x
-
-      - uses: actions/download-artifact@v4
-        with:
-          path: ./dist
-          pattern: artifacts-*
-          merge-multiple: true
-
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
