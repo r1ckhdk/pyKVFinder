@@ -27,7 +27,7 @@ def get_extra_link_args():
 
 def get_extra_compile_args():
     if sys.platform == "darwin":
-        extra_compile_args = ["-Xpreprocessor", "-fopenmp=libomp", "-O2", "-ffast-math"]
+        extra_compile_args = ["-Xpreprocessor", "-fopenmp=libomp", "-O1", "-ffast-math"]
     elif sys.platform == "linux":
         extra_compile_args = ["-fopenmp", "-Ofast"]
     elif sys.platform == "win32":
